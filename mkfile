@@ -1,0 +1,2 @@
+bwc:
+	go build
