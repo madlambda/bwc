@@ -1,2 +1,3 @@
-bwc:
+bwc:V:
 	go build
+
