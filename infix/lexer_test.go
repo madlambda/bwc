@@ -83,6 +83,8 @@ func TestLexer(t *testing.T) {
 		tc := tc
 		got := consume(infix.Lex(tc.in))
 		if len(got) != len(tc.out) {
+			t.Logf("test data: %v", tc.in)
+			t.Logf("got: %v", got)
 			t.Fatalf("expect %d elems but got %d",
 				len(tc.out), len(got))
 		}

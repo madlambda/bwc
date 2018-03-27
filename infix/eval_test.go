@@ -7,18 +7,24 @@ import (
 
 var format = fmt.Sprintf
 
-func desc(a Expr, res Int) string {
-	return format("%s %s %s = %s",
-		a.Lhs, a.Rhs, a.Op, res)
+func desc(n Node, res Int) string {
+	if n.Type() == NodeExpr {
+		a := n.(*Expr)
+		return format("%s %s %s = %s",
+			a.Lhs, a.Rhs, a.Op, res)
+	}
+
+	a := n.(Int)
+	return format("%d", a)
 }
 
 func TestEval(t *testing.T) {
 	for _, tc := range []struct {
-		expr Expr
+		expr Node
 		res  Int
 	}{
 		{
-			expr: Expr{
+			expr: &Expr{
 				Op:  OpAND,
 				Lhs: Int(0),
 				Rhs: Int(0),
@@ -26,7 +32,7 @@ func TestEval(t *testing.T) {
 			res: 0,
 		},
 		{
-			expr: Expr{
+			expr: &Expr{
 				Op:  OpAND,
 				Lhs: Int(0),
 				Rhs: Int(1),
@@ -34,7 +40,7 @@ func TestEval(t *testing.T) {
 			res: 0,
 		},
 		{
-			expr: Expr{
+			expr: &Expr{
 				Op:  OpAND,
 				Lhs: Int(1),
 				Rhs: Int(1),
@@ -42,7 +48,7 @@ func TestEval(t *testing.T) {
 			res: 1,
 		},
 		{
-			expr: Expr{
+			expr: &Expr{
 				Op:  OpAND,
 				Lhs: Int(0xffff0000),
 				Rhs: Int(0x0000ffff),
@@ -50,7 +56,7 @@ func TestEval(t *testing.T) {
 			res: 0,
 		},
 		{
-			expr: Expr{
+			expr: &Expr{
 				Op:  OpOR,
 				Lhs: Int(0xffff0000),
 				Rhs: Int(0x0000ffff),
@@ -60,9 +66,9 @@ func TestEval(t *testing.T) {
 
 		// groups
 		{
-			expr: Expr{
+			expr: &Expr{
 				Op: OpAND,
-				Lhs: Expr{
+				Lhs: &Expr{
 					Op:  OpOR,
 					Lhs: Int(0xffff0000),
 					Rhs: Int(0x0000ffff),
@@ -72,14 +78,14 @@ func TestEval(t *testing.T) {
 			res: 0x000000ff,
 		},
 		{
-			expr: Expr{
+			expr: &Expr{
 				Op: OpOR,
-				Lhs: Expr{
+				Lhs: &Expr{
 					Op:  OpOR,
 					Lhs: Int(0x000000ff),
 					Rhs: Int(0xff000000),
 				},
-				Rhs: Expr{
+				Rhs: &Expr{
 					Op:  OpOR,
 					Lhs: Int(0x00ff0000),
 					Rhs: Int(0x0000ff00),
@@ -90,7 +96,10 @@ func TestEval(t *testing.T) {
 	} {
 		tc := tc
 		t.Run(desc(tc.expr, tc.res), func(t *testing.T) {
-			got := Eval(tc.expr)
+			got, err := Eval(tc.expr)
+			if err != nil {
+				t.Fatal(err)
+			}
 			if got != tc.res {
 				t.Fatalf("Fail: %d != %d", got, tc.res)
 			}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"unicode/utf8"
+	"unicode"
 )
 
 type (
@@ -25,6 +26,10 @@ type (
 )
 
 const eof = -1
+
+func (t Tokval) String() string {
+	return fmt.Sprintf("Token(%s, %s)", t.T, t.V)
+}
 
 func Lex(input string) chan Tokval {
 	l := &Lexer{
@@ -81,6 +86,10 @@ func (l *Lexer) backup() {
 	l.pos -= l.width
 }
 
+func (l *Lexer) ignore() {
+	l.start = l.pos
+}
+
 func (l *Lexer) acceptRun(valid string) {
 	for strings.IndexRune(valid, l.next()) >= 0 {
 	
@@ -92,13 +101,28 @@ func (l *Lexer) acceptRun(valid string) {
 	}
 }
 
+func (l *Lexer) acceptRunfn(fn func (r rune) bool) {
+	for fn(l.next()) {
+
+	}
+
+	// no rewind in case of end of input
+	if l.current() != eof {
+		l.backup()
+	}
+}
+
 func lexStart(l *Lexer) stateFn {
 	r := l.next()
 	switch {
+	case unicode.IsSpace(r):
+		l.acceptRunfn(unicode.IsSpace)
+		l.ignore()
+		return lexStart
 	case r == eof:
 		return nil
-	case '0' <= r && r <= '9':
-		l.acceptRun("xb0123456789")
+	case r >= '0' || r <= '9':
+		l.acceptRun("0123456789")
 		l.emit(Number)
 		return lexStart
 	case r == '|':
@@ -106,6 +130,12 @@ func lexStart(l *Lexer) stateFn {
 		return lexStart
 	case r == '&':
 		l.emit(AND)
+		return lexStart
+	case r == '(':
+		l.emit(LParen)
+		return lexStart
+	case r == ')':
+		l.emit(RParen)
 		return lexStart
 	default:
 		l.errorf("Unexpected %q at %d", r, l.pos)
