@@ -75,6 +75,12 @@ func (l *Lexer) current() rune {
 
 func (l *Lexer) next() (r rune) {
 	if l.pos >= len(l.input) {
+		// zeroes the width to simplify handling at
+		// end of input. Some functions like acceptRun*
+		// do a explicit rewind/backup of last processed
+		// character, but in case of eof we dont want
+		// that.
+		l.width = 0
 		return eof
 	}
 	r, l.width = utf8.DecodeRuneInString(l.input[l.pos:])
@@ -92,13 +98,9 @@ func (l *Lexer) ignore() {
 
 func (l *Lexer) acceptRun(valid string) {
 	for strings.IndexRune(valid, l.next()) >= 0 {
-	
 	}
 
-	// no rewind in case of end of input
-	if l.current() != eof {
-		l.backup()
-	}
+	l.backup()
 }
 
 func (l *Lexer) acceptRunfn(fn func (r rune) bool) {
@@ -106,22 +108,19 @@ func (l *Lexer) acceptRunfn(fn func (r rune) bool) {
 
 	}
 
-	// no rewind in case of end of input
-	if l.current() != eof {
-		l.backup()
-	}
+	l.backup()
 }
 
 func lexStart(l *Lexer) stateFn {
 	r := l.next()
 	switch {
-	case unicode.IsSpace(r):
+	case unicode.IsSpace(r):	
 		l.acceptRunfn(unicode.IsSpace)
 		l.ignore()
 		return lexStart
 	case r == eof:
 		return nil
-	case r >= '0' || r <= '9':
+	case r >= '0' && r <= '9':
 		l.acceptRun("0123456789")
 		l.emit(Number)
 		return lexStart

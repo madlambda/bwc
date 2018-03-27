@@ -37,8 +37,6 @@ func Eval(n Node) (Int, error) {
 		rhs = expr.Rhs.(Int)
 	}
 
-	fmt.Printf("Evaluating: %d %s %d\n", lhs, expr.Op, rhs)
-
 	var ret Int
 	switch expr.Op {
 	case OpAND:

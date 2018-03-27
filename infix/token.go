@@ -1,16 +1,20 @@
 package infix
 
+import (
+	"strconv"
+)
+
 type (
 	Token int
 )
 
 const (
-	Number Token = iota+1
+	Illegal Token = iota
+	Number
 	LParen
 	RParen
 	OR
 	AND
-	Illegal
 	EOF
 )
 
@@ -23,5 +27,5 @@ func (t Token) String() string {
 	case Illegal: return "<ileggal>"
 	case EOF: return "EOF"
 	}
-	return "<invalid>"
+	return strconv.Itoa(int(t))
 }

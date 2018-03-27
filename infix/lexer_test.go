@@ -53,7 +53,6 @@ func TestLexer(t *testing.T) {
 				},
 			},
 		},
-
 		{
 			in: "0&0|1",
 			out: []infix.Tokval{
@@ -76,6 +75,31 @@ func TestLexer(t *testing.T) {
 				{
 					T: infix.Number,
 					V: "1",
+				},
+			},
+		},
+		{
+			in: "(0&0)",
+			out: []infix.Tokval{
+				{
+					T: infix.LParen,
+					V: "(",
+				},
+				{
+					T: infix.Number,
+					V: "0",
+				},
+				{
+					T: infix.AND,
+					V: "&",
+				},
+				{
+					T: infix.Number,
+					V: "0",
+				},
+				{
+					T: infix.RParen,
+					V: ")",
 				},
 			},
 		},
