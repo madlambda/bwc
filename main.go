@@ -2,46 +2,63 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 )
 
 type (
+	Int int64
 	Expr struct {
-		Op  int
+		Op  Optype
 		Lhs Node
 		Rhs Node
 	}
 
 	Node interface {
-		Type() int
+		Type() Nodetype
+		String() string
 	}
 
-	Int int64
+	Nodetype int
+	Optype int
 )
 
 const (
-	Nodetype = iota
-	NodeExpr
+	NodeExpr Nodetype = iota+1
 	NodeInt
 
-	Optype = iota
-	OpAND
+	OpAND Optype = iota+1
 	OpOR
 )
 
-func (_ Int) Type() int { return NodeInt }
-func (_ Expr) Type() int { return NodeExpr }
+func (o Optype) String() string {
+	if o == OpAND 	{ return "&" }
+	if o == OpOR 	{ return "|" }
+	return "<invalid op>"
+}
 
-func eval(tree Expr) Int {
+func (_ Int) Type() Nodetype  { return NodeInt }
+func (i Int) String() string { return strconv.Itoa(int(i)) }
+
+func (_ Expr) Type() Nodetype { return NodeExpr }
+func (a Expr) String() string {
+	lhs := a.Lhs.String()
+	rhs := a.Rhs.String()
+	op := a.Op.String()
+
+	return fmt.Sprintf("%s %s %s", lhs, rhs, op)
+}
+
+func Eval(tree Expr) Int {
 	var lhs, rhs Int
 
 	if tree.Lhs.Type() != NodeInt {
-		lhs = eval(tree.Lhs.(Expr))
+		lhs = Eval(tree.Lhs.(Expr))
 	} else {
 		lhs = tree.Lhs.(Int)
 	}
 
 	if tree.Rhs.Type() != NodeInt {
-		rhs = eval(tree.Rhs.(Expr))
+		rhs = Eval(tree.Rhs.(Expr))
 	} else {
 		rhs = tree.Rhs.(Int)
 	}
@@ -63,5 +80,5 @@ func main() {
 		Rhs: Int(2),
 	}
 
-	fmt.Printf("%d\n", eval(expr))
+	fmt.Printf("%d\n", Eval(expr))
 }
