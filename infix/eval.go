@@ -1,16 +1,16 @@
 package infix	
 
-func Eval(tree Expr) Int {
+func Eval(tree *Expr) Int {
 	var lhs, rhs Int
 
 	if tree.Lhs.Type() != NodeInt {
-		lhs = Eval(tree.Lhs.(Expr))
+		lhs = Eval(tree.Lhs.(*Expr))
 	} else {
 		lhs = tree.Lhs.(Int)
 	}
 
 	if tree.Rhs.Type() != NodeInt {
-		rhs = Eval(tree.Rhs.(Expr))
+		rhs = Eval(tree.Rhs.(*Expr))
 	} else {
 		rhs = tree.Rhs.(Int)
 	}

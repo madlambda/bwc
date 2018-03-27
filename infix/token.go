@@ -11,5 +11,4 @@ const (
 	OR
 	AND
 	Illegal
-	EOF
 )
