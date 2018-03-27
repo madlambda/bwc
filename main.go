@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"io"
+	"os"
 
 	"github.com/madlambda/bwc/infix"
 )
@@ -20,7 +20,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		tree, err := infix.Parse(string(line[:n]))
+		tree, err := infix.Parse(string(line[:n-1]))
 		if err != nil {
 			fmt.Printf("error: %s\n", err)
 			continue
