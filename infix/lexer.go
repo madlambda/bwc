@@ -116,6 +116,7 @@ func (l *lexer) accept(valid string) bool {
 	return strings.IndexRune(valid, l.peek()) != -1
 }
 
+// acceptRun consumes next runes if valid.
 func (l *lexer) acceptRun(valid string) {
 	for strings.IndexRune(valid, l.next()) >= 0 {
 	}
@@ -123,6 +124,8 @@ func (l *lexer) acceptRun(valid string) {
 	l.backup()
 }
 
+// acceptRunfn is like acceptRun but uses fn as 
+// function comparator.
 func (l *lexer) acceptRunfn(fn func(r rune) bool) {
 	for fn(l.next()) {
 
@@ -131,6 +134,7 @@ func (l *lexer) acceptRunfn(fn func(r rune) bool) {
 	l.backup()
 }
 
+// lexStart is the start of state machine
 func lexStart(l *lexer) stateFn {
 	r := l.next()
 	switch {
