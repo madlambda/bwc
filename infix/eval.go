@@ -5,10 +5,8 @@ import (
 )
 
 func Eval(n Node) (Int, error) {
-	var (
-		lhs, rhs Int
-		err error
-	)
+	var lhs, rhs Int
+	var err error
 
 	if n.Type() == NodeInt {
 		return n.(Int), nil
