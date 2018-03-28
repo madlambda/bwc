@@ -28,6 +28,8 @@ const (
 
 	OpAND Optype = iota + 1
 	OpOR
+	OpSHL
+	OpSHR
 )
 
 func (o Optype) String() string {

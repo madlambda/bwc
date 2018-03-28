@@ -15,6 +15,8 @@ const (
 	RParen
 	OR
 	AND
+	SHL
+	SHR
 	EOF
 )
 

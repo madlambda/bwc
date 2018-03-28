@@ -43,6 +43,10 @@ func Eval(n Node) (Int, error) {
 		ret = lhs & rhs
 	case OpOR:
 		ret = lhs | rhs
+	case OpSHL:
+		ret = lhs << uint(rhs)
+	case OpSHR:
+		ret = lhs >> uint(rhs)
 	}
 	return ret, nil
 }

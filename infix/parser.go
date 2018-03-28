@@ -138,7 +138,20 @@ func (p *parser) parseNum() (a Int, eof bool, err error) {
 		return 0, false, parserErr(tok)
 	}
 
-	val, err := strconv.Atoi(tok.V)
+	intstr := tok.V
+	if len(intstr) > 2 {
+		if intstr[1] == 'b' {
+			val, err := strconv.ParseInt(intstr[2:], 2, 64)
+			return Int(val), false, err
+		}
+
+		if intstr[1] == 'x' {
+			val, err := strconv.ParseInt(intstr[2:], 16, 64)
+			return Int(val), false, err
+		}
+	}	
+
+	val, err := strconv.ParseInt(intstr, 10, 64)
 	return Int(val), false, err
 }
 
@@ -161,6 +174,10 @@ func validOperation(tok Token) (Optype, bool) {
 		return OpAND, true
 	case OR:
 		return OpOR, true
+	case SHL:
+		return OpSHL, true
+	case SHR:
+		return OpSHR, true
 	}
 
 	return -1, false
