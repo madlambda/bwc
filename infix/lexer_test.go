@@ -68,8 +68,25 @@ func TestLexer(t *testing.T) {
 					V: "0",
 				},
 				{
-					T: infix.AND,
+					T: infix.AND, 
 					V: "&",
+				},
+				{
+					T: infix.Number,
+					V: "0",
+				},
+			},
+		},
+		{
+			in: "0^0",
+			out: []infix.Tokval{
+				{
+					T: infix.Number,
+					V: "0",
+				},
+				{
+					T: infix.XOR,
+					V: "^",
 				},
 				{
 					T: infix.Number,

@@ -1,8 +1,4 @@
-package infix
-
-import (
-	"strconv"
-)
+package infix 
 
 type (
 	Token int
@@ -15,6 +11,8 @@ const (
 	RParen
 	OR
 	AND
+	XOR
+	NOT
 	SHL
 	SHR
 	EOF
@@ -26,8 +24,12 @@ func (t Token) String() string {
 	case RParen: return ")"
 	case OR: return "|"
 	case AND: return "&"
+	case XOR: return "^"
+	case NOT: return "~"
+	case SHL: return "<<"
+	case SHR: return ">>"
 	case Illegal: return "<ileggal>"
 	case EOF: return "EOF"
 	}
-	return strconv.Itoa(int(t))
+	panic("invalid token")
 }

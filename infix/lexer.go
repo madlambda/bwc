@@ -142,7 +142,7 @@ func lexStart(l *lexer) stateFn {
 		l.acceptRunfn(unicode.IsSpace)
 		l.ignore()
 		return lexStart
-	case r == eof:
+	case r == eof: 
 		return nil
 	case r >= '0' && r <= '9':
 		l.backup()
@@ -152,6 +152,12 @@ func lexStart(l *lexer) stateFn {
 		return lexStart
 	case r == '&':
 		l.emit(AND)
+		return lexStart
+	case r == '^':
+		l.emit(XOR)
+		return lexStart
+	case r == '~':
+		l.emit(NOT)
 		return lexStart
 	case r == '<':
 		next := l.next()

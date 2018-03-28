@@ -76,6 +76,8 @@ func (p *parser) parseExpr() (Node, error) {
 		hasparens = true
 		p.next()
 		lhs, err = p.parseExpr()
+	} else if tok.T == NOT {
+		lhs, eof, err = p.parseUnary()
 	} else {
 		lhs, eof, err = p.parseNum()
 	}
@@ -94,7 +96,7 @@ func (p *parser) parseExpr() (Node, error) {
 		}
 	}
 
-	op, eof, err := p.parseOp()
+	op, eof, err := p.parseBinOP()
 	if err != nil {
 		return nil, err
 	}
@@ -110,11 +112,13 @@ func (p *parser) parseExpr() (Node, error) {
 	if tok.T == EOF {
 		return nil, eoferr("rhs of expr")
 	}
-
+ 
 	if tok.T == LParen {
 		hasparens = true
 		p.next()
 		rhs, err = p.parseExpr()
+	} else if tok.T == NOT {
+		lhs, eof, err = p.parseUnary()
 	} else {
 		rhs, eof, err = p.parseNum()
 	}
@@ -133,7 +137,7 @@ func (p *parser) parseExpr() (Node, error) {
 		}
 	}
 
-	return Expr{
+	return BinExpr{
 		Op:  op,
 		Lhs: lhs,
 		Rhs: rhs,
@@ -167,25 +171,49 @@ func (p *parser) parseNum() (a Int, eof bool, err error) {
 	return Int(val), false, err
 }
 
-func (p *parser) parseOp() (a Optype, eof bool, err error) {
+func (p *parser) parseUnary() (n Node, eof bool, err error) {
+	tok := p.next()
+	
+	var val UnaryExpr
+	if tok.T == NOT {
+		val.Op = OpNOT
+	} else {
+		return nil, false, fmt.Errorf("invalid unary: %q", tok.V)
+	}
+
+	num, eof, err := p.parseNum()
+	if err != nil {
+		return nil, false, err
+	}
+	if eof {
+		return nil, true, nil
+	}
+
+	val.Value = num
+	return val, false, nil
+}
+
+func (p *parser) parseBinOP() (a Optype, eof bool, err error) {
 	optok := p.next()
 	if optok.T == EOF {
 		return 0, true, nil
 	}
 
-	op, ok := validOperation(optok.T)
+	op, ok := validBinOP(optok.T)
 	if !ok {
 		return 0, false, parserErr(optok)
 	}
 	return op, false, nil
 }
 
-func validOperation(tok Token) (Optype, bool) {
+func validBinOP(tok Token) (Optype, bool) {
 	switch tok {
 	case AND:
 		return OpAND, true
 	case OR:
 		return OpOR, true
+	case XOR:
+		return OpXOR, true
 	case SHL:
 		return OpSHL, true
 	case SHR:

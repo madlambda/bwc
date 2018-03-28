@@ -5,20 +5,40 @@ import (
 )
 
 func Eval(n Node) (Int, error) {
-	var lhs, rhs Int
-	var err error
-
 	if n.Type() == NodeInt {
 		return n.(Int), nil
 	}
 
-	if n.Type() != NodeExpr {
+	if n.Type() == NodeUnaryExpr {
+		return evalUnaryExpr(n.(UnaryExpr))
+	}
+
+	if n.Type() != NodeBinExpr {
 		return 0, fmt.Errorf("unexpected %s", n)
 	}
 
-	expr := n.(Expr)
+	return evalBinExpr(n.(BinExpr))
+}
+
+func evalUnaryExpr(expr UnaryExpr) (Int, error) {
+	num, err := Eval(expr.Value)
+	if err != nil {
+		return 0, err
+	}
+
+	switch expr.Op {
+	case OpNOT:
+		return Int(^int64(num)), nil
+	}
+
+	return 0, fmt.Errorf("invalid unary expr: %s", expr.Op)
+}
+ 
+func evalBinExpr(expr BinExpr) (Int, error) {
+	var lhs, rhs Int
+	var err error
 	if expr.Lhs.Type() != NodeInt {
-		lhs, err = Eval(expr.Lhs.(Expr))
+		lhs, err = Eval(expr.Lhs)
 		if err != nil {
 			return 0, err
 		}
@@ -27,7 +47,7 @@ func Eval(n Node) (Int, error) {
 	}
 
 	if expr.Rhs.Type() != NodeInt {
-		rhs, err = Eval(expr.Rhs.(Expr))
+		rhs, err = Eval(expr.Rhs)
 		if err != nil {
 			return 0, err
 		}

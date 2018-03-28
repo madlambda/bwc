@@ -57,10 +57,14 @@ decimal	= decdigit { decdigit };
 hexadecimal	= "0x" hexdigit { hexdigit };
 binary		= "0b" bindigit { bindigit };
 
-number	= decimal | hexadecimal | binary;
-ident	= alphanum {alphanum};
-op	= "&" | "|" | "<<" | ">>";
-expr	= 	[ "(" ] (expr | number) op (expr | number) [ ")" ];
+number		= decimal | hexadecimal | binary;
+ident		= alphanum {alphanum};
+binaryop	= "&" | "|" | "^" | "<<" | ">>";
+unaryop		= "~";
+expr		= [ "(" ] unaryexpr | binaryexpr [ ")" ];
+binaryexpr	= (expr | binaryexpr | unaryexpr | number) binaryop 
+				(expr | unaryexpr | binaryexpr | number);
+unaryexpr	= unaryop (expr | unaryexpr | binaryexpr | number);
 
 grammar = number | ident | expr;
 ```

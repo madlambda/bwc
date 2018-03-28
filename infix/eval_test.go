@@ -8,10 +8,13 @@ import (
 var format = fmt.Sprintf
 
 func desc(n Node, res Int) string {
-	if n.Type() == NodeExpr {
-		a := n.(Expr)
+	if n.Type() == NodeBinExpr {
+		a := n.(BinExpr)
 		return format("%s %s %s = %s",
 			a.Lhs, a.Rhs, a.Op, res)
+	} else if n.Type() == NodeUnaryExpr {
+		a := n.(UnaryExpr)
+		return format("%s%s", a.Op, a.Value)
 	}
 
 	a := n.(Int)
@@ -24,7 +27,7 @@ func TestEval(t *testing.T) {
 		res  Int
 	}{
 		{
-			expr: Expr{
+			expr: BinExpr{
 				Op:  OpAND,
 				Lhs: Int(0),
 				Rhs: Int(0),
@@ -32,7 +35,7 @@ func TestEval(t *testing.T) {
 			res: 0,
 		},
 		{
-			expr: Expr{
+			expr: BinExpr{
 				Op:  OpAND,
 				Lhs: Int(0),
 				Rhs: Int(1),
@@ -40,7 +43,7 @@ func TestEval(t *testing.T) {
 			res: 0,
 		},
 		{
-			expr: Expr{
+			expr: BinExpr{
 				Op:  OpAND,
 				Lhs: Int(1),
 				Rhs: Int(1),
@@ -48,7 +51,7 @@ func TestEval(t *testing.T) {
 			res: 1,
 		},
 		{
-			expr: Expr{
+			expr: BinExpr{
 				Op:  OpAND,
 				Lhs: Int(0xffff0000),
 				Rhs: Int(0x0000ffff),
@@ -56,7 +59,7 @@ func TestEval(t *testing.T) {
 			res: 0,
 		},
 		{
-			expr: Expr{
+			expr: BinExpr{
 				Op:  OpOR,
 				Lhs: Int(0xffff0000),
 				Rhs: Int(0x0000ffff),
@@ -66,9 +69,9 @@ func TestEval(t *testing.T) {
 
 		// groups
 		{
-			expr: Expr{
+			expr: BinExpr{
 				Op: OpAND,
-				Lhs: Expr{
+				Lhs: BinExpr{
 					Op:  OpOR,
 					Lhs: Int(0xffff0000),
 					Rhs: Int(0x0000ffff),
@@ -78,20 +81,27 @@ func TestEval(t *testing.T) {
 			res: 0x000000ff,
 		},
 		{
-			expr: Expr{
+			expr: BinExpr{
 				Op: OpOR,
-				Lhs: Expr{
+				Lhs: BinExpr{
 					Op:  OpOR,
 					Lhs: Int(0x000000ff),
 					Rhs: Int(0xff000000),
 				},
-				Rhs: Expr{
+				Rhs: BinExpr{
 					Op:  OpOR,
 					Lhs: Int(0x00ff0000),
 					Rhs: Int(0x0000ff00),
 				},
 			},
 			res: 0xffffffff,
+		},
+		{
+			expr: UnaryExpr{
+				Op: OpNOT,
+				Value: Int(7),
+			},
+			res: -8,
 		},
 	} {
 		tc := tc
