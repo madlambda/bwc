@@ -59,7 +59,7 @@ binary		= "0b" bindigit { bindigit };
 
 number	= decimal | hexadecimal | binary;
 ident	= alphanum {alphanum};
-op		= "&" | "|" | "<<" | ">>";
+op	= "&" | "|" | "<<" | ">>";
 expr	= 	[ "(" ] (expr | number) op (expr | number) [ ")" ];
 
 grammar = number | ident | expr;
