@@ -55,7 +55,7 @@ func (p *parser) next() Tokval {
 }
 
 func (p *parser) parseExpr() (Node, error) {
-	var eoferr = func (expect string) error {
+	var eoferr = func(expect string) error {
 		return fmt.Errorf("premature eof, expects %s",
 			expect)
 	}
@@ -80,8 +80,12 @@ func (p *parser) parseExpr() (Node, error) {
 		lhs, eof, err = p.parseNum()
 	}
 
-	if err != nil 	{ return nil, err }
-	if eof 			{ return nil, eoferr("expr || number") }
+	if err != nil {
+		return nil, err
+	}
+	if eof {
+		return nil, eoferr("expr || number")
+	}
 
 	if hasparens {
 		tok = p.next()
@@ -91,8 +95,12 @@ func (p *parser) parseExpr() (Node, error) {
 	}
 
 	op, eof, err := p.parseOp()
-	if err != nil 	{ return nil, err }
-	if eof 			{ return lhs, nil }
+	if err != nil {
+		return nil, err
+	}
+	if eof {
+		return lhs, nil
+	}
 
 	// right hand side of expr
 	var rhs Node
@@ -111,8 +119,12 @@ func (p *parser) parseExpr() (Node, error) {
 		rhs, eof, err = p.parseNum()
 	}
 
-	if err != nil 	{ return nil, err }
-	if eof 			{ return nil, eoferr("number") }
+	if err != nil {
+		return nil, err
+	}
+	if eof {
+		return nil, eoferr("number")
+	}
 
 	if hasparens {
 		tok := p.next()
@@ -149,7 +161,7 @@ func (p *parser) parseNum() (a Int, eof bool, err error) {
 			val, err := strconv.ParseInt(intstr[2:], 16, 64)
 			return Int(val), false, err
 		}
-	}	
+	}
 
 	val, err := strconv.ParseInt(intstr, 10, 64)
 	return Int(val), false, err
