@@ -49,9 +49,9 @@ letter		= "a".."z" | "A".."Z";
 digit		= "0".."9";
 alphanum	= letter | digit;
 
-decdigit = "0".."9";
-hexdigit = decdigit | "a".."f";
-bindigit = "0" | "1";
+decdigit 	= "0".."9";
+hexdigit 	= decdigit | "a".."f";
+bindigit 	= "0" | "1";
 
 decimal		= decdigit { decdigit };
 hexadecimal	= "0x" hexdigit { hexdigit };
