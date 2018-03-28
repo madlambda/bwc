@@ -16,9 +16,9 @@ func Eval(n Node) (Int, error) {
 		return 0, fmt.Errorf("unexpected %s", n)
 	}
 
-	expr := n.(*Expr)
+	expr := n.(Expr)
 	if expr.Lhs.Type() != NodeInt {
-		lhs, err = Eval(expr.Lhs.(*Expr))
+		lhs, err = Eval(expr.Lhs.(Expr))
 		if err != nil {
 			return 0, err
 		}
@@ -27,7 +27,7 @@ func Eval(n Node) (Int, error) {
 	}
 
 	if expr.Rhs.Type() != NodeInt {
-		rhs, err = Eval(expr.Rhs.(*Expr))
+		rhs, err = Eval(expr.Rhs.(Expr))
 		if err != nil {
 			return 0, err
 		}

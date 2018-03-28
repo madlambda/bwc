@@ -121,7 +121,7 @@ func (p *parser) parseExpr() (Node, error) {
 		}
 	}
 
-	return &Expr{
+	return Expr{
 		Op:  op,
 		Lhs: lhs,
 		Rhs: rhs,

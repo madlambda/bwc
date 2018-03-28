@@ -148,7 +148,7 @@ func TestLexer(t *testing.T) {
 					V: "1",
 				},
 				{
-					T: infix.RShift,
+					T: infix.SHR,
 					V: ">>",
 				},
 				{

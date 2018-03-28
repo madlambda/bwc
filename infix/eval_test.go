@@ -9,7 +9,7 @@ var format = fmt.Sprintf
 
 func desc(n Node, res Int) string {
 	if n.Type() == NodeExpr {
-		a := n.(*Expr)
+		a := n.(Expr)
 		return format("%s %s %s = %s",
 			a.Lhs, a.Rhs, a.Op, res)
 	}
@@ -24,7 +24,7 @@ func TestEval(t *testing.T) {
 		res  Int
 	}{
 		{
-			expr: &Expr{
+			expr: Expr{
 				Op:  OpAND,
 				Lhs: Int(0),
 				Rhs: Int(0),
@@ -32,7 +32,7 @@ func TestEval(t *testing.T) {
 			res: 0,
 		},
 		{
-			expr: &Expr{
+			expr: Expr{
 				Op:  OpAND,
 				Lhs: Int(0),
 				Rhs: Int(1),
@@ -40,7 +40,7 @@ func TestEval(t *testing.T) {
 			res: 0,
 		},
 		{
-			expr: &Expr{
+			expr: Expr{
 				Op:  OpAND,
 				Lhs: Int(1),
 				Rhs: Int(1),
@@ -48,7 +48,7 @@ func TestEval(t *testing.T) {
 			res: 1,
 		},
 		{
-			expr: &Expr{
+			expr: Expr{
 				Op:  OpAND,
 				Lhs: Int(0xffff0000),
 				Rhs: Int(0x0000ffff),
@@ -56,7 +56,7 @@ func TestEval(t *testing.T) {
 			res: 0,
 		},
 		{
-			expr: &Expr{
+			expr: Expr{
 				Op:  OpOR,
 				Lhs: Int(0xffff0000),
 				Rhs: Int(0x0000ffff),
@@ -66,9 +66,9 @@ func TestEval(t *testing.T) {
 
 		// groups
 		{
-			expr: &Expr{
+			expr: Expr{
 				Op: OpAND,
-				Lhs: &Expr{
+				Lhs: Expr{
 					Op:  OpOR,
 					Lhs: Int(0xffff0000),
 					Rhs: Int(0x0000ffff),
@@ -78,14 +78,14 @@ func TestEval(t *testing.T) {
 			res: 0x000000ff,
 		},
 		{
-			expr: &Expr{
+			expr: Expr{
 				Op: OpOR,
-				Lhs: &Expr{
+				Lhs: Expr{
 					Op:  OpOR,
 					Lhs: Int(0x000000ff),
 					Rhs: Int(0xff000000),
 				},
-				Rhs: &Expr{
+				Rhs: Expr{
 					Op:  OpOR,
 					Lhs: Int(0x00ff0000),
 					Rhs: Int(0x0000ff00),
