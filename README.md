@@ -2,7 +2,7 @@
 
 Because I'm dumb.
 
-# language
+# The tool
 
 The language was designed in a such a way that
 makes easy to copy-paste bitwises from code
@@ -40,4 +40,27 @@ bwc> X
 bin: 11111111
 hex: ff
 bwc>
+```
+
+# The language
+
+```bnf
+letter 		= "a".."z" | "A".."Z";
+digit 		= "0".."9";
+alphanum 	= letter | digit;
+
+decdigit = "0".."9";
+hexdigit = decdigit | "a".."f";
+bindigit = "0" | "1";
+
+decimal 	= decdigit { decdigit };
+hexadecimal	= "0x" hexdigit { hexdigit };
+binary		= "0b" bindigit { bindigit };
+
+number 	= decimal | hexadecimal | binary;
+ident	= alphanum {alphanum};
+op	= "&" | "|" | "<<" | ">>";
+expr	= 	[ "(" ] (expr | number) op (expr | number) [ ")" ];
+
+grammar = number | ident | expr;
 ```
