@@ -57,7 +57,7 @@ hexadecimal	= "0x" hexdigit { hexdigit };
 binary		= "0b" bindigit { bindigit };
 
 number		= decimal | hexadecimal | binary;
-ident		= alphanum {alphanum};
+ident		= letter {alphanum};
 binaryop	= "&" | "|" | "^" | "<<" | ">>";
 unaryop		= "~";
 expr		= [ "(" ] unaryexpr | binaryexpr [ ")" ];
