@@ -68,20 +68,27 @@ func (o Optype) String() string {
 	return "<invalid op>"
 }
 
+func (nt Nodetype) String() string {
+	if nt == NodeUnaryExpr {
+		return "NodeUnaryExpr"
+	} else if nt == NodeBinExpr {
+		return "NodeBinExpr"
+	} else if nt == NodeInt {
+		return "NodeInt"
+	}
+	return "<invalid node>"
+}
+
 func (_ Int) Type() Nodetype { return NodeInt }
 func (i Int) String() string { return strconv.Itoa(int(i)) }
 
 func (_ BinExpr) Type() Nodetype { return NodeBinExpr }
 func (a BinExpr) String() string {
-	lhs := a.Lhs.String()
-	rhs := a.Rhs.String()
-	op := a.Op.String()
-
-	return fmt.Sprintf("%s %s %s", lhs, rhs, op)
+	return fmt.Sprintf("%s%s%s", a.Lhs, a.Op, a.Rhs)
 }
 
 func (_ UnaryExpr) Type() Nodetype { return NodeUnaryExpr }
 func (a UnaryExpr) String() string {
 	return fmt.Sprintf("%s%s",
-		a.Op.String(), a.Value.String())
+		a.Op, a.Value)
 }

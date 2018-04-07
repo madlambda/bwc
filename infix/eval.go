@@ -4,20 +4,26 @@ import (
 	"fmt"
 )
 
+func Exec(code string) (Int, error) {
+	n, err := Parse(code)
+	if err != nil {
+		return 0, err
+	}
+	return Eval(n)
+}
+
 func Eval(n Node) (Int, error) {
-	if n.Type() == NodeInt {
+	switch n.Type() {
+	case NodeInt:
 		return n.(Int), nil
-	}
-
-	if n.Type() == NodeUnaryExpr {
+	case NodeUnaryExpr:
 		return evalUnaryExpr(n.(UnaryExpr))
+	case NodeBinExpr:
+		return evalBinExpr(n.(BinExpr))
 	}
 
-	if n.Type() != NodeBinExpr {
-		return 0, fmt.Errorf("unexpected %s", n)
-	}
 
-	return evalBinExpr(n.(BinExpr))
+	return 0, fmt.Errorf("unexpected %s", n) 
 }
 
 func evalUnaryExpr(expr UnaryExpr) (Int, error) {
@@ -65,6 +71,8 @@ func evalBinExpr(expr BinExpr) (Int, error) {
 		ret = lhs << uint(rhs)
 	case OpSHR:
 		ret = lhs >> uint(rhs)
+	default:
+		return 0, fmt.Errorf("invalid op (%v)", expr.Op)
 	}
 	return ret, nil
 }

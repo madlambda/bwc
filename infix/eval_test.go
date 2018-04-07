@@ -21,6 +21,59 @@ func desc(n Node, res Int) string {
 	return format("%d", a)
 }
 
+func TestEvalGrammar(t *testing.T) {
+	for _, tc := range []struct {
+		code string
+		res  Int
+	}{
+		{
+			code: "0",
+			res:  0,
+		},
+		{
+			code: "0|1",
+			res:  1,
+		},
+		{
+			code: "0|1|2",
+			res:  3,
+		},
+		{
+			code: "0|1|2|3",
+			// 00000000
+			// 00000001
+			// 00000010
+			// 00000011
+			res: 3,
+		},
+		{
+			code: "0|1|2|3|4",
+			res:  7,
+		},
+		{
+			code: "0&1",
+			res:  0,
+		},
+		{
+			code: "7&3",
+			res:  3,
+		},
+		{
+			code: "1|2&1",
+			res:  1,
+		},
+	} {
+		got, err := Exec(tc.code)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if got != tc.res {
+			t.Fatalf("got(%s) != expected(%s)", got, tc.res)
+		}
+	}
+}
+
 func TestEval(t *testing.T) {
 	for _, tc := range []struct {
 		expr Node
@@ -98,7 +151,7 @@ func TestEval(t *testing.T) {
 		},
 		{
 			expr: UnaryExpr{
-				Op: OpNOT,
+				Op:    OpNOT,
 				Value: Int(7),
 			},
 			res: -8,

@@ -15,6 +15,11 @@ var TokEOF = Tokval{
 	V: "<eof>",
 }
 
+func eoferr(expect string) error {
+	return fmt.Errorf("premature eof, expects %s",
+		expect)
+}
+
 func parserErr(tok Tokval) error {
 	return fmt.Errorf("unexpected %s", tok)
 }
@@ -54,100 +59,104 @@ func (p *parser) next() Tokval {
 	return tok
 }
 
-func (p *parser) parseExpr() (Node, error) {
-	var eoferr = func(expect string) error {
-		return fmt.Errorf("premature eof, expects %s",
-			expect)
-	}
+func (p *parser) parseOperand() (n Node, eof bool, err error) {
+	var hasparens bool
 
 	tok := p.peek()
 	if tok.T == EOF {
-		return nil, eoferr("expression")
+		return nil, true, eoferr("expr || number")
 	}
 
-	// left hand side of expr
-
-	var lhs Node
-	var err error
-	var eof bool
-
-	var hasparens bool
 	if tok.T == LParen {
 		hasparens = true
 		p.next()
-		lhs, err = p.parseExpr()
+		n, err = p.parseExpr()
 	} else if tok.T == NOT {
-		lhs, eof, err = p.parseUnary()
+		n, err = p.parseUnary()
 	} else {
-		lhs, eof, err = p.parseNum()
+		n, eof, err = p.parseNum()
 	}
 
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	if eof {
-		return nil, eoferr("expr || number")
+		return n, true, nil
 	}
 
 	if hasparens {
 		tok = p.next()
 		if tok.T != RParen {
-			return nil, parserErr(tok)
+			return nil, tok.T == EOF, parserErr(tok)
 		}
+	}
+
+	return n, false, nil
+}
+
+func (p *parser) parseExpr() (Node, error) {
+	// left hand side of expr
+	lhs, eof, err := p.parseOperand()
+	if err != nil {
+		return nil, err
+	}
+
+	if eof {
+		return lhs, nil
 	}
 
 	op, eof, err := p.parseBinOP()
 	if err != nil {
 		return nil, err
 	}
+
 	if eof {
 		return lhs, nil
 	}
 
 	// right hand side of expr
-	var rhs Node
-	hasparens = false
-
-	tok = p.peek()
-	if tok.T == EOF {
-		return nil, eoferr("rhs of expr")
-	}
- 
-	if tok.T == LParen {
-		hasparens = true
-		p.next()
-		rhs, err = p.parseExpr()
-	} else if tok.T == NOT {
-		lhs, eof, err = p.parseUnary()
-	} else {
-		rhs, eof, err = p.parseNum()
-	}
-
+	rhs, eof, err := p.parseOperand()
 	if err != nil {
 		return nil, err
 	}
-	if eof {
-		return nil, eoferr("number")
-	}
 
-	if hasparens {
-		tok := p.next()
-		if tok.T != RParen {
-			return nil, parserErr(tok)
-		}
-	}
-
-	return BinExpr{
+	expr := BinExpr{
 		Op:  op,
 		Lhs: lhs,
 		Rhs: rhs,
-	}, nil
+	}
+
+	if eof {
+		return expr, nil
+	}
+
+	// additional, non grouped, expressions
+	for !eof {
+		op, eof, err = p.parseBinOP()
+		if eof {
+			return expr, nil
+		}
+
+		rhs, err = p.parseExpr()
+		if err != nil {
+			return nil, err
+		}
+
+		// 0|1&2|3 == (((0|1)&2)|3)
+		// operation order is left to right
+		expr = BinExpr{
+			Op: op,
+			Lhs: expr,
+			Rhs: rhs,
+		}
+	}
+	return expr, nil
 }
 
 func (p *parser) parseNum() (a Int, eof bool, err error) {
 	tok := p.next()
 	if tok.T == EOF {
-		return 0, true, nil
+		return 0, true, eoferr("expected number")
 	}
 
 	if tok.T != Number {
@@ -171,26 +180,26 @@ func (p *parser) parseNum() (a Int, eof bool, err error) {
 	return Int(val), false, err
 }
 
-func (p *parser) parseUnary() (n Node, eof bool, err error) {
+func (p *parser) parseUnary() (n Node, err error) {
 	tok := p.next()
-	
+
 	var val UnaryExpr
 	if tok.T == NOT {
 		val.Op = OpNOT
 	} else {
-		return nil, false, fmt.Errorf("invalid unary: %q", tok.V)
+		return nil, fmt.Errorf("invalid unary: %q", tok.V)
 	}
 
 	num, eof, err := p.parseNum()
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
 	if eof {
-		return nil, true, nil
+		return nil, fmt.Errorf("expected number")
 	}
 
 	val.Value = num
-	return val, false, nil
+	return val, nil
 }
 
 func (p *parser) parseBinOP() (a Optype, eof bool, err error) {
