@@ -46,8 +46,7 @@ bwc>
 
 ```bnf
 letter		= "a".."z" | "A".."Z";
-digit		= "0".."9";
-alphanum	= letter | digit;
+alphanum	= letter | decdigit;
 
 decdigit 	= "0".."9";
 hexdigit 	= decdigit | "a".."f";
