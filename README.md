@@ -7,7 +7,7 @@ Because I'm dumb.
 The language was designed in a such a way that
 makes easy to copy-paste bitwises from code
 in most programming languages (at least from
-C generation). Take a look in the code below:
+C descendents). Take a look in the code below:
 
 ```go
 func stripe(val uint32) uint64 {
