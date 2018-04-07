@@ -39,26 +39,24 @@ func evalUnaryExpr(expr UnaryExpr) (Int, error) {
 
 	return 0, fmt.Errorf("invalid unary expr: %s", expr.Op)
 }
- 
-func evalBinExpr(expr BinExpr) (Int, error) {
-	var lhs, rhs Int
-	var err error
-	if expr.Lhs.Type() != NodeInt {
-		lhs, err = Eval(expr.Lhs)
-		if err != nil {
-			return 0, err
-		}
-	} else {
-		lhs = expr.Lhs.(Int)
+
+func evalOperand(n Node) (Int, error) {
+	if n.Type() != NodeInt {
+		return Eval(n)
 	}
 
-	if expr.Rhs.Type() != NodeInt {
-		rhs, err = Eval(expr.Rhs)
-		if err != nil {
-			return 0, err
-		}
-	} else {
-		rhs = expr.Rhs.(Int)
+	return n.(Int), nil
+}
+ 
+func evalBinExpr(expr BinExpr) (Int, error) {
+	lhs, err := evalOperand(expr.Lhs)
+	if err != nil {
+		return 0, err
+	}
+	
+	rhs, err := evalOperand(expr.Rhs)
+	if err != nil {
+		return 0, err
 	}
 
 	var ret Int
@@ -72,7 +70,7 @@ func evalBinExpr(expr BinExpr) (Int, error) {
 	case OpSHR:
 		ret = lhs >> uint(rhs)
 	default:
-		return 0, fmt.Errorf("invalid op (%v)", expr.Op)
+		return 0	, fmt.Errorf("invalid op (%v)", expr.Op)
 	}
 	return ret, nil
 }
