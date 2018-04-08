@@ -1,6 +1,6 @@
 # bwc - bitwise calculator
 
-Because I'm dumb.
+Because bitwises are trick.
 
 # The tool
 
@@ -60,10 +60,13 @@ number		= decimal | hexadecimal | binary;
 ident		= letter {alphanum};
 binaryop	= "&" | "|" | "^" | "<<" | ">>";
 unaryop		= "~";
-expr		= [ "(" ] unaryexpr | binaryexpr [ ")" ];
-binaryexpr	= (expr | binaryexpr | unaryexpr | number) binaryop 
-				(expr | unaryexpr | binaryexpr | number);
-unaryexpr	= unaryop (expr | unaryexpr | binaryexpr | number);
+mathexpr	= [ "(" ] unaryexpr | binaryexpr [ ")" ];
+operand		= expr | binaryexpr | unaryexpr | number;
+binaryexpr	= operand binaryop operand;
+unaryexpr	= unaryop operand;
+expr		= number | ident | mathexpr;
 
-grammar = number | ident | expr;
+assignment	= ident "=" expr;
+
+grammar		= assignment | expr;
 ```
