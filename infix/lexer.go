@@ -138,6 +138,14 @@ func (l *lexer) acceptRunfn(fn func(r rune) bool) {
 func lexStart(l *lexer) stateFn {
 	r := l.next()
 	switch {
+	case isIdentBegin(r):
+		l.acceptRunfn(func (r rune) bool {
+			return unicode.IsLetter(r) ||
+					unicode.IsDigit(r) ||
+					r == '_'
+		})
+		l.emit(Ident)
+		return lexStart		
 	case unicode.IsSpace(r):
 		l.acceptRunfn(unicode.IsSpace)
 		l.ignore()
@@ -178,6 +186,9 @@ func lexStart(l *lexer) stateFn {
 		return lexStart
 	case r == ')':
 		l.emit(RParen)
+		return lexStart
+	case r == '=':
+		l.emit(Equal)
 		return lexStart
 	default:
 		return l.errorf("Unexpected %q at %d", r, l.pos)
@@ -222,4 +233,9 @@ func lexNumber(l *lexer) stateFn {
 
 func isAlphaNumeric(r rune) bool {
 	return unicode.IsLetter(r) || unicode.IsDigit(r)
+}
+
+// isIdentBegin tells if r could be the first rune of an ident.
+func isIdentBegin(r rune) bool {
+	return unicode.IsLetter(r) || r == '_'
 }

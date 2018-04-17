@@ -7,7 +7,7 @@ import (
 
 type parser struct {
 	tokens chan Tokval
-	pocket *Tokval // lookahead
+	lookahead []Tokval
 }
 
 var TokEOF = Tokval{
@@ -20,38 +20,49 @@ func eoferr(expect string) error {
 		expect)
 }
 
-func parserErr(tok Tokval) error {
-	return fmt.Errorf("unexpected %s", tok)
+func parserErr(expected string, tok Tokval) error {
+	return fmt.Errorf("expected %s but got %s", expected, tok)
 }
 
 func Parse(code string) (Node, error) {
 	p := &parser{
 		tokens: Lex(code),
 	}
-	return p.parseExpr()
+	return p.parse()
 }
 
-func (p *parser) peek() Tokval {
-	if p.pocket != nil {
-		val := *p.pocket
-		p.pocket = nil
-		return val
+// scry foretell the future using a crystal ball. Amount is how much
+// of the future you want to foresee.
+func (p *parser) scry(amount int) []Tokval {
+	if len(p.lookahead) > 2 {
+		panic("lookahead > 2")
 	}
 
-	val, ok := <-p.tokens
-	if !ok {
-		return TokEOF
+	for i := 0; i < amount; i++ {
+		val, ok := <-p.tokens
+		if !ok {
+			val = TokEOF
+		}
+
+		p.lookahead = append(p.lookahead, val)
 	}
-	p.pocket = &val
-	return val
+
+	return p.lookahead
 }
 
+// forget what you had foresee
+func (p *parser) forget() {
+	p.lookahead = nil
+}
+
+// next returns the next token and consume it.
 func (p *parser) next() Tokval {
-	if p.pocket != nil {
-		val := *p.pocket
-		p.pocket = nil
-		return val
+	if len(p.lookahead) > 0 {
+		tok := p.lookahead[0]
+		p.lookahead = p.lookahead[1:]
+		return tok
 	}
+
 	tok, ok := <-p.tokens
 	if !ok {
 		return TokEOF
@@ -59,20 +70,73 @@ func (p *parser) next() Tokval {
 	return tok
 }
 
+func (p *parser) parse() (Node, error) {
+	toks := p.scry(2)
+	if toks[0].T == EOF {
+		return nil, eoferr("assign || expr")
+	}
+
+	// <ident>
+	// <ident> = <expr>
+	// <ident> <op> <expr>
+	// requires one lookahead
+
+	ident := toks[0]
+	next := toks[1]
+	if ident.T == Ident && next.T == Equal {
+		return p.parseAssign()
+	}
+
+	return p.parseExpr()
+}
+
+func (p *parser) parseAssign() (Node, error) {
+	if len(p.lookahead) != 2 {
+		p.scry(2)
+	}
+
+	id := p.lookahead[0]
+	eq := p.lookahead[1]
+
+	if id.T != Ident {
+			return nil, parserErr("IDENT", id)
+	}
+	if eq.T != Equal {
+		return nil, parserErr("EQUAL", eq)
+	}
+
+	p.forget()
+
+	expr, err := p.parseExpr()
+	if err != nil {
+		return nil, err
+	}
+
+	return Assign{
+		Varname: id.V,
+		Expr:    expr,
+	}, nil
+}
+
 func (p *parser) parseOperand() (n Node, eof bool, err error) {
 	var hasparens bool
 
-	tok := p.peek()
+	p.scry(1)
+
+	tok := p.lookahead[0]
 	if tok.T == EOF {
 		return nil, true, eoferr("expr || number")
 	}
 
 	if tok.T == LParen {
 		hasparens = true
-		p.next()
+		p.forget()
 		n, err = p.parseExpr()
 	} else if tok.T == NOT {
 		n, err = p.parseUnary()
+	} else if tok.T == Ident {
+		n = Var(tok.V)
+		p.forget()
 	} else {
 		n, eof, err = p.parseNum()
 	}
@@ -87,7 +151,7 @@ func (p *parser) parseOperand() (n Node, eof bool, err error) {
 	if hasparens {
 		tok = p.next()
 		if tok.T != RParen {
-			return nil, tok.T == EOF, parserErr(tok)
+			return nil, tok.T == EOF, parserErr("RPAREN", tok)
 		}
 	}
 
@@ -145,7 +209,7 @@ func (p *parser) parseExpr() (Node, error) {
 		// 0|1&2|3 == (((0|1)&2)|3)
 		// operation order is left to right
 		expr = BinExpr{
-			Op: op,
+			Op:  op,
 			Lhs: expr,
 			Rhs: rhs,
 		}
@@ -160,7 +224,7 @@ func (p *parser) parseNum() (a Int, eof bool, err error) {
 	}
 
 	if tok.T != Number {
-		return 0, false, parserErr(tok)
+		return 0, false, parserErr("NUMBER", tok)
 	}
 
 	intstr := tok.V
@@ -210,7 +274,7 @@ func (p *parser) parseBinOP() (a Optype, eof bool, err error) {
 
 	op, ok := validBinOP(optok.T)
 	if !ok {
-		return 0, false, parserErr(optok)
+		return 0, false, parserErr("OPERATION", optok)
 	}
 	return op, false, nil
 }

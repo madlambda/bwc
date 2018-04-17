@@ -178,6 +178,66 @@ func TestLexer(t *testing.T) {
 				},
 			},
 		},
+		{
+			in: "a = 0",
+			out: []infix.Tokval{
+				{
+					T: infix.Ident,
+					V: "a",
+				},
+				{
+					T: infix.Equal,
+					V: "=",
+				},
+				{
+					T: infix.Number,
+					V: "0",
+				},
+			},
+		},
+		{
+			in: "aa = aa",
+			out: []infix.Tokval{
+				{
+					T: infix.Ident,
+					V: "aa",
+				},
+				{
+					T: infix.Equal,
+					V: "=",
+				},
+				{
+					T: infix.Ident,
+					V: "aa",
+				},
+			},
+		},
+		{
+			in: "_a = 0b10000",
+			out: []infix.Tokval{
+				{
+					T: infix.Ident,
+					V: "_a",
+				},
+				{
+					T: infix.Equal,
+					V: "=",
+				},
+				{
+					T: infix.Number,
+					V: "0b10000",
+				},
+			},
+		},
+		{
+			in: "1invalid = 0b10000",
+			out: []infix.Tokval{
+				{
+					T: infix.Illegal,
+					V: "malformed number",
+				},
+			},
+		},
 	} {
 		tc := tc
 		test(t, tc)

@@ -9,6 +9,9 @@ type (
 	// Int represents integer numbers
 	Int int64
 
+	// Var is a variable
+	Var string
+
 	// UnaryExpr holds unary operations like ~
 	UnaryExpr struct {
 		Op    Optype
@@ -20,6 +23,11 @@ type (
 		Op  Optype
 		Lhs Node
 		Rhs Node
+	}
+
+	Assign struct {
+		Varname string // Varname is the lhs of the assignment
+		Expr    Node   // Expr is the rhs of the assignment
 	}
 
 	Node interface {
@@ -34,11 +42,13 @@ type (
 const (
 	NodeUnaryExpr Nodetype = iota + 1
 	NodeBinExpr
+	NodeAssign
 	NodeInt
+	NodeVar
 
 	binaryOPbegin Optype = iota + 1
 	OpAND
-	OpOR 
+	OpOR
 	OpXOR
 	OpSHL
 	OpSHR
@@ -65,7 +75,7 @@ func (o Optype) String() string {
 		return ">>"
 	}
 
-	return "<invalid op>"
+	panic(fmt.Sprintf("invalid operation: %d", o))
 }
 
 func (nt Nodetype) String() string {
@@ -75,12 +85,17 @@ func (nt Nodetype) String() string {
 		return "NodeBinExpr"
 	} else if nt == NodeInt {
 		return "NodeInt"
+	} else if nt == NodeAssign {
+		return "NodeAssign"
 	}
-	return "<invalid node>"
+	panic(fmt.Sprintf("invalid node: %d", nt))
 }
 
 func (_ Int) Type() Nodetype { return NodeInt }
 func (i Int) String() string { return strconv.Itoa(int(i)) }
+
+func (_ Var) Type() Nodetype { return NodeVar }
+func (a Var) String() string { return string(a) }
 
 func (_ BinExpr) Type() Nodetype { return NodeBinExpr }
 func (a BinExpr) String() string {
@@ -91,4 +106,9 @@ func (_ UnaryExpr) Type() Nodetype { return NodeUnaryExpr }
 func (a UnaryExpr) String() string {
 	return fmt.Sprintf("%s%s",
 		a.Op, a.Value)
+}
+
+func (_ Assign) Type() Nodetype { return NodeAssign }
+func (a Assign) String() string {
+	return fmt.Sprintf("%s = %s", a.Varname, a.Expr)
 }
