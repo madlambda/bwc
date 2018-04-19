@@ -96,6 +96,14 @@ func TestEvalGrammar(t *testing.T) {
 			code: "1<<10|0xff",
 			res: 0x4ff,
 		},
+		{
+			code: "b = 0b01010101",
+			res: 0x55,
+		},
+		{
+			code: "a&b",
+			res: 85,
+		},
 	} {
 		
 		got, err := interp.Exec(tc.code)
