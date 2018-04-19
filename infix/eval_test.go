@@ -22,6 +22,8 @@ func desc(n Node, res Int) string {
 }
 
 func TestEvalGrammar(t *testing.T) {
+	interp := NewInterp()
+
 	for _, tc := range []struct {
 		code string
 		res  Int
@@ -62,8 +64,21 @@ func TestEvalGrammar(t *testing.T) {
 			code: "1|2&1",
 			res:  1,
 		},
+		{
+			code: "a = 0",
+			res: 0,
+		},
+		{
+			code: "b = a",
+			res: 0,
+		},
+		{
+			code: "a | 1",
+			res: 1,
+		},
 	} {
-		got, err := Exec(tc.code)
+		
+		got, err := interp.Exec(tc.code)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -159,7 +174,8 @@ func TestEval(t *testing.T) {
 	} {
 		tc := tc
 		t.Run(desc(tc.expr, tc.res), func(t *testing.T) {
-			got, err := Eval(tc.expr)
+			interp := NewInterp()
+			got, err := interp.Eval(tc.expr)
 			if err != nil {
 				t.Fatal(err)
 			}

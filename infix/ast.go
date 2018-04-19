@@ -87,6 +87,8 @@ func (nt Nodetype) String() string {
 		return "NodeInt"
 	} else if nt == NodeAssign {
 		return "NodeAssign"
+	} else if nt == NodeVar {
+		return "NodeVar"
 	}
 	panic(fmt.Sprintf("invalid node: %d", nt))
 }

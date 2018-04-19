@@ -4,30 +4,51 @@ import (
 	"fmt"
 )
 
-func Exec(code string) (Int, error) {
+type interp struct {
+	environ map[string]Int
+}
+
+func NewInterp() *interp {
+	return &interp{
+		environ: make(map[string]Int),
+	}
+}
+
+func (e *interp) Exec(code string) (Int, error) {
 	n, err := Parse(code)
 	if err != nil {
 		return 0, err
 	}
-	return Eval(n)
+	return e.Eval(n)
 }
 
-func Eval(n Node) (Int, error) {
+func (e *interp) Eval(n Node) (Int, error) {
 	switch n.Type() {
 	case NodeInt:
 		return n.(Int), nil
+	case NodeVar:
+		return e.evalVar(n.(Var))
 	case NodeUnaryExpr:
-		return evalUnaryExpr(n.(UnaryExpr))
+		return e.evalUnaryExpr(n.(UnaryExpr))
 	case NodeBinExpr:
-		return evalBinExpr(n.(BinExpr))
+		return e.evalBinExpr(n.(BinExpr))
+	case NodeAssign:
+		return e.evalAssign(n.(Assign))
 	}
 
 
 	return 0, fmt.Errorf("unexpected %s", n) 
 }
 
-func evalUnaryExpr(expr UnaryExpr) (Int, error) {
-	num, err := Eval(expr.Value)
+func (e *interp) evalVar(v Var) (Int, error) {
+	if val, ok := e.environ[string(v)]; ok {
+		return val, nil
+	}
+	return 0, fmt.Errorf("undefined variable %s", v)
+}
+
+func (e *interp) evalUnaryExpr(expr UnaryExpr) (Int, error) {
+	num, err := e.Eval(expr.Value)
 	if err != nil {
 		return 0, err
 	}
@@ -40,21 +61,21 @@ func evalUnaryExpr(expr UnaryExpr) (Int, error) {
 	return 0, fmt.Errorf("invalid unary expr: %s", expr.Op)
 }
 
-func evalOperand(n Node) (Int, error) {
+func (e *interp) evalOperand(n Node) (Int, error) {
 	if n.Type() != NodeInt {
-		return Eval(n)
+		return e.Eval(n)
 	}
 
 	return n.(Int), nil
 }
  
-func evalBinExpr(expr BinExpr) (Int, error) {
-	lhs, err := evalOperand(expr.Lhs)
+func (e *interp) evalBinExpr(expr BinExpr) (Int, error) {
+	lhs, err := e.evalOperand(expr.Lhs)
 	if err != nil {
 		return 0, err
 	}
 	
-	rhs, err := evalOperand(expr.Rhs)
+	rhs, err := e.evalOperand(expr.Rhs)
 	if err != nil {
 		return 0, err
 	}
@@ -72,5 +93,14 @@ func evalBinExpr(expr BinExpr) (Int, error) {
 	default:
 		return 0	, fmt.Errorf("invalid op (%v)", expr.Op)
 	}
+	return ret, nil
+}
+
+func (e *interp) evalAssign(assign Assign) (Int, error) {
+	ret, err := e.Eval(assign.Expr)
+	if err != nil {
+		return 0, err
+	}
+	e.environ[assign.Varname] = ret
 	return ret, nil
 }

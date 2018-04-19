@@ -84,6 +84,42 @@ func TestParserBinExpr(t *testing.T) {
 				Rhs: Int(2),
 			},
 		},
+		{
+			code: "a|1",
+			ast: BinExpr{
+				Op:  OpOR,
+				Lhs: Var("a"),
+				Rhs: Int(1),
+			},
+		},
+		{
+			code: "(a|1)",
+			ast: BinExpr{
+				Op:  OpOR,
+				Lhs: Var("a"),
+				Rhs: Int(1),
+			},
+		},
+		{
+			code: "((a|1))",
+			ast: BinExpr{
+				Op:  OpOR,
+				Lhs: Var("a"),
+				Rhs: Int(1),
+			},
+		},
+		{
+			code: "((a|1)|2)",
+			ast: BinExpr{
+				Op: OpOR,
+				Lhs: BinExpr{
+					Op:  OpOR,
+					Lhs: Var("a"),
+					Rhs: Int(1),
+				},
+				Rhs: Int(2),
+			},
+		},
 	} {
 		test(t, tc)
 	}

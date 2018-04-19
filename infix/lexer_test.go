@@ -31,11 +31,11 @@ func test(t *testing.T, tc testcase) {
 	for i := 0; i < len(tc.out); i++ {
 		e := tc.out[i]
 		g := got[i]
-		if e.T != g.T {
+		if e.Type != g.Type {
 			t.Fatalf("tok differs: %v != %v", e, g)
 		}
-		if e.V != g.V {
-			t.Fatalf("tok differs: %s != %s", e.V, g.V)
+		if e.Value != g.Value {
+			t.Fatalf("tok differs: %s != %s", e.Value, g.Value)
 		}
 	}
 }
@@ -46,8 +46,8 @@ func TestLexer(t *testing.T) {
 			in: "0",
 			out: []infix.Tokval{
 				{
-					T: infix.Number,
-					V: "0",
+					Type:  infix.Number,
+					Value: "0",
 				},
 			},
 		},
@@ -55,8 +55,8 @@ func TestLexer(t *testing.T) {
 			in: "0123456789",
 			out: []infix.Tokval{
 				{
-					T: infix.Number,
-					V: "0123456789",
+					Type:  infix.Number,
+					Value: "0123456789",
 				},
 			},
 		},
@@ -64,16 +64,16 @@ func TestLexer(t *testing.T) {
 			in: "0&0",
 			out: []infix.Tokval{
 				{
-					T: infix.Number,
-					V: "0",
+					Type:  infix.Number,
+					Value: "0",
 				},
 				{
-					T: infix.AND, 
-					V: "&",
+					Type:  infix.AND,
+					Value: "&",
 				},
 				{
-					T: infix.Number,
-					V: "0",
+					Type:  infix.Number,
+					Value: "0",
 				},
 			},
 		},
@@ -81,16 +81,16 @@ func TestLexer(t *testing.T) {
 			in: "0^0",
 			out: []infix.Tokval{
 				{
-					T: infix.Number,
-					V: "0",
+					Type:  infix.Number,
+					Value: "0",
 				},
 				{
-					T: infix.XOR,
-					V: "^",
+					Type:  infix.XOR,
+					Value: "^",
 				},
 				{
-					T: infix.Number,
-					V: "0",
+					Type:  infix.Number,
+					Value: "0",
 				},
 			},
 		},
@@ -98,24 +98,24 @@ func TestLexer(t *testing.T) {
 			in: "0&0|1",
 			out: []infix.Tokval{
 				{
-					T: infix.Number,
-					V: "0",
+					Type:  infix.Number,
+					Value: "0",
 				},
 				{
-					T: infix.AND,
-					V: "&",
+					Type:  infix.AND,
+					Value: "&",
 				},
 				{
-					T: infix.Number,
-					V: "0",
+					Type:  infix.Number,
+					Value: "0",
 				},
 				{
-					T: infix.OR,
-					V: "|",
+					Type:  infix.OR,
+					Value: "|",
 				},
 				{
-					T: infix.Number,
-					V: "1",
+					Type:  infix.Number,
+					Value: "1",
 				},
 			},
 		},
@@ -123,24 +123,24 @@ func TestLexer(t *testing.T) {
 			in: "(0&0)",
 			out: []infix.Tokval{
 				{
-					T: infix.LParen,
-					V: "(",
+					Type:  infix.LParen,
+					Value: "(",
 				},
 				{
-					T: infix.Number,
-					V: "0",
+					Type:  infix.Number,
+					Value: "0",
 				},
 				{
-					T: infix.AND,
-					V: "&",
+					Type:  infix.AND,
+					Value: "&",
 				},
 				{
-					T: infix.Number,
-					V: "0",
+					Type:  infix.Number,
+					Value: "0",
 				},
 				{
-					T: infix.RParen,
-					V: ")",
+					Type:  infix.RParen,
+					Value: ")",
 				},
 			},
 		},
@@ -148,8 +148,8 @@ func TestLexer(t *testing.T) {
 			in: "0xf",
 			out: []infix.Tokval{
 				{
-					T: infix.Number,
-					V: "0xf",
+					Type:  infix.Number,
+					Value: "0xf",
 				},
 			},
 		},
@@ -157,24 +157,24 @@ func TestLexer(t *testing.T) {
 			in: "(1>>2)",
 			out: []infix.Tokval{
 				{
-					T: infix.LParen,
-					V: "(",
+					Type:  infix.LParen,
+					Value: "(",
 				},
 				{
-					T: infix.Number,
-					V: "1",
+					Type:  infix.Number,
+					Value: "1",
 				},
 				{
-					T: infix.SHR,
-					V: ">>",
+					Type:  infix.SHR,
+					Value: ">>",
 				},
 				{
-					T: infix.Number,
-					V: "2",
+					Type:  infix.Number,
+					Value: "2",
 				},
 				{
-					T: infix.RParen,
-					V: ")",
+					Type:  infix.RParen,
+					Value: ")",
 				},
 			},
 		},
@@ -182,16 +182,16 @@ func TestLexer(t *testing.T) {
 			in: "a = 0",
 			out: []infix.Tokval{
 				{
-					T: infix.Ident,
-					V: "a",
+					Type:  infix.Ident,
+					Value: "a",
 				},
 				{
-					T: infix.Equal,
-					V: "=",
+					Type:  infix.Equal,
+					Value: "=",
 				},
 				{
-					T: infix.Number,
-					V: "0",
+					Type:  infix.Number,
+					Value: "0",
 				},
 			},
 		},
@@ -199,16 +199,16 @@ func TestLexer(t *testing.T) {
 			in: "aa = aa",
 			out: []infix.Tokval{
 				{
-					T: infix.Ident,
-					V: "aa",
+					Type:  infix.Ident,
+					Value: "aa",
 				},
 				{
-					T: infix.Equal,
-					V: "=",
+					Type:  infix.Equal,
+					Value: "=",
 				},
 				{
-					T: infix.Ident,
-					V: "aa",
+					Type:  infix.Ident,
+					Value: "aa",
 				},
 			},
 		},
@@ -216,16 +216,16 @@ func TestLexer(t *testing.T) {
 			in: "_a = 0b10000",
 			out: []infix.Tokval{
 				{
-					T: infix.Ident,
-					V: "_a",
+					Type:  infix.Ident,
+					Value: "_a",
 				},
 				{
-					T: infix.Equal,
-					V: "=",
+					Type:  infix.Equal,
+					Value: "=",
 				},
 				{
-					T: infix.Number,
-					V: "0b10000",
+					Type:  infix.Number,
+					Value: "0b10000",
 				},
 			},
 		},
@@ -233,8 +233,8 @@ func TestLexer(t *testing.T) {
 			in: "1invalid = 0b10000",
 			out: []infix.Tokval{
 				{
-					T: infix.Illegal,
-					V: "malformed number",
+					Type:  infix.Illegal,
+					Value: "malformed number",
 				},
 			},
 		},
@@ -250,8 +250,8 @@ func TestLexerNumbers(t *testing.T) {
 			in: "01",
 			out: []infix.Tokval{
 				{
-					T: infix.Number,
-					V: "01",
+					Type:  infix.Number,
+					Value: "01",
 				},
 			},
 		},
@@ -259,8 +259,8 @@ func TestLexerNumbers(t *testing.T) {
 			in: "97497239472938",
 			out: []infix.Tokval{
 				{
-					T: infix.Number,
-					V: "97497239472938",
+					Type:  infix.Number,
+					Value: "97497239472938",
 				},
 			},
 		},
@@ -268,8 +268,8 @@ func TestLexerNumbers(t *testing.T) {
 			in: "0b",
 			out: []infix.Tokval{
 				{
-					T: infix.Illegal,
-					V: "malformed binary number",
+					Type:  infix.Illegal,
+					Value: "malformed binary number",
 				},
 			},
 		},
@@ -277,8 +277,8 @@ func TestLexerNumbers(t *testing.T) {
 			in: "0bf",
 			out: []infix.Tokval{
 				{
-					T: infix.Illegal,
-					V: "malformed binary number",
+					Type:  infix.Illegal,
+					Value: "malformed binary number",
 				},
 			},
 		},
@@ -286,8 +286,8 @@ func TestLexerNumbers(t *testing.T) {
 			in: "0b111112",
 			out: []infix.Tokval{
 				{
-					T: infix.Illegal,
-					V: "malformed number",
+					Type:  infix.Illegal,
+					Value: "malformed number",
 				},
 			},
 		},
@@ -295,8 +295,8 @@ func TestLexerNumbers(t *testing.T) {
 			in: "0xffg",
 			out: []infix.Tokval{
 				{
-					T: infix.Illegal,
-					V: "malformed number",
+					Type:  infix.Illegal,
+					Value: "malformed number",
 				},
 			},
 		},
@@ -304,8 +304,8 @@ func TestLexerNumbers(t *testing.T) {
 			in: "0b11111111",
 			out: []infix.Tokval{
 				{
-					T: infix.Number,
-					V: "0b11111111",
+					Type:  infix.Number,
+					Value: "0b11111111",
 				},
 			},
 		},

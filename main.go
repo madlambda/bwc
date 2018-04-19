@@ -10,6 +10,8 @@ import (
 )
 
 func main() {
+	interp := infix.NewInterp()
+
 	for {
 		fmt.Printf("bwc> ")
 		var line [256]byte
@@ -34,7 +36,7 @@ func main() {
 			continue
 		}
 
-		res, err := infix.Eval(tree)
+		res, err := interp.Eval(tree)
 		if err != nil {
 			fmt.Printf("error: %s\n", err)
 		}

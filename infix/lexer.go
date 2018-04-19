@@ -20,8 +20,9 @@ type (
 
 	// Tokval is the token type + value
 	Tokval struct {
-		T Token
-		V string
+		Type  Token
+		Value string
+		Pos   int
 	}
 )
 
@@ -30,7 +31,7 @@ type (
 const eof = -1
 
 func (t Tokval) String() string {
-	return fmt.Sprintf("Token(%s, %s)", t.T, t.V)
+	return fmt.Sprintf("Token(%s, %s)", t.Type, t.Value)
 }
 
 // Lex creates a concurrent lexer and returns a
@@ -56,8 +57,9 @@ func (l *lexer) run() {
 // emit a token.
 func (l *lexer) emit(tok Token) {
 	l.tokens <- Tokval{
-		T: tok,
-		V: l.input[l.start:l.pos],
+		Type:   tok,
+		Value:   l.input[l.start:l.pos],
+		Pos: l.start,
 	}
 	l.start = l.pos
 }
@@ -66,8 +68,9 @@ func (l *lexer) emit(tok Token) {
 // the lexer error.
 func (l *lexer) errorf(msg string, args ...interface{}) stateFn {
 	l.tokens <- Tokval{
-		T: Illegal,
-		V: fmt.Sprintf(msg, args...),
+		Type: Illegal,
+		Value: fmt.Sprintf(msg, args...),
+		Pos: l.start,
 	}
 	return nil
 }
@@ -124,7 +127,7 @@ func (l *lexer) acceptRun(valid string) {
 	l.backup()
 }
 
-// acceptRunfn is like acceptRun but uses fn as 
+// acceptRunfn is like acceptRun but uses fn as
 // function comparator.
 func (l *lexer) acceptRunfn(fn func(r rune) bool) {
 	for fn(l.next()) {
@@ -139,18 +142,18 @@ func lexStart(l *lexer) stateFn {
 	r := l.next()
 	switch {
 	case isIdentBegin(r):
-		l.acceptRunfn(func (r rune) bool {
+		l.acceptRunfn(func(r rune) bool {
 			return unicode.IsLetter(r) ||
-					unicode.IsDigit(r) ||
-					r == '_'
+				unicode.IsDigit(r) ||
+				r == '_'
 		})
 		l.emit(Ident)
-		return lexStart		
+		return lexStart
 	case unicode.IsSpace(r):
 		l.acceptRunfn(unicode.IsSpace)
 		l.ignore()
 		return lexStart
-	case r == eof: 
+	case r == eof:
 		return nil
 	case r >= '0' && r <= '9':
 		l.backup()
@@ -201,7 +204,7 @@ func lexNumber(l *lexer) stateFn {
 	r := l.next()
 	next := l.peek()
 	if r == '0' && next == 'b' {
-		// 0bnnnnnnnn	
+		// 0bnnnnnnnn
 		l.next()
 		digits := "01"
 		if !l.accept(digits) {
