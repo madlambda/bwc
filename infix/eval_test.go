@@ -76,6 +76,26 @@ func TestEvalGrammar(t *testing.T) {
 			code: "a | 1",
 			res: 1,
 		},
+		{
+			code: "a = 0xff",
+			res: 0xff,
+		},
+		{
+			code: "a&1",
+			res: 1,
+		},
+		{
+			code: "(a&0)|1",
+			res: 1,
+		},
+		{
+			code: "a&(a&0)",
+			res: 0,
+		},
+		{
+			code: "1<<10|0xff",
+			res: 0x4ff,
+		},
 	} {
 		
 		got, err := interp.Exec(tc.code)
