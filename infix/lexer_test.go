@@ -10,7 +10,7 @@ type testcase struct {
 	out []infix.Tokval
 }
 
-func consume(tokens chan infix.Tokval) []infix.Tokval {
+func consume(tokens <-chan infix.Tokval) []infix.Tokval {
 	var toks []infix.Tokval
 	for tok := range tokens {
 		toks = append(toks, tok)

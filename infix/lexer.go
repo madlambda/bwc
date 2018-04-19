@@ -36,7 +36,7 @@ func (t Tokval) String() string {
 
 // Lex creates a concurrent lexer and returns a
 // channel of tokens processed from input.
-func Lex(input string) chan Tokval {
+func Lex(input string) <-chan Tokval {
 	l := &lexer{
 		input:  input,
 		tokens: make(chan Tokval),

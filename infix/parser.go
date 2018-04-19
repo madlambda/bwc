@@ -6,7 +6,7 @@ import (
 )
 
 type parser struct {
-	tokens    chan Tokval
+	tokens    <-chan Tokval
 	lookahead []Tokval
 }
 
