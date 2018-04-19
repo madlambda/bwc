@@ -39,7 +39,22 @@ bwc> X = (X | (X << 16)) & 0x0000ffff0000ffff
 bwc> X
 bin: 11111111
 hex: ff
-bwc>
+
+# paste the rest of the statements
+bwc> X = (X | (X << 8)) & 0x00ff00ff00ff00ff
+bin: 11111111
+hex: ff
+bwc> X = (X | (X << 4)) & 0x0f0f0f0f0f0f0f0f
+bin: 111100001111
+hex: f0f
+bwc> X = (X | (X << 2)) & 0x3333333333333333
+bin: 11001100110011
+hex: 3333
+bwc> X = (X | (X << 1)) & 0x5555555555555555
+bin: 101010101010101
+hex: 5555
+
+# hmm, bit interleaving =)
 ```
 
 # The language
