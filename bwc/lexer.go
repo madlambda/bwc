@@ -1,4 +1,4 @@
-package infix
+package bwc
 
 import (
 	"fmt"
@@ -57,9 +57,9 @@ func (l *lexer) run() {
 // emit a token.
 func (l *lexer) emit(tok Token) {
 	l.tokens <- Tokval{
-		Type:   tok,
-		Value:   l.input[l.start:l.pos],
-		Pos: l.start,
+		Type:  tok,
+		Value: l.input[l.start:l.pos],
+		Pos:   l.start,
 	}
 	l.start = l.pos
 }
@@ -68,9 +68,9 @@ func (l *lexer) emit(tok Token) {
 // the lexer error.
 func (l *lexer) errorf(msg string, args ...interface{}) stateFn {
 	l.tokens <- Tokval{
-		Type: Illegal,
+		Type:  Illegal,
 		Value: fmt.Sprintf(msg, args...),
-		Pos: l.start,
+		Pos:   l.start,
 	}
 	return nil
 }

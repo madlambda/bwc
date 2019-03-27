@@ -1,4 +1,4 @@
-package infix
+package bwc
 
 import "fmt"
 

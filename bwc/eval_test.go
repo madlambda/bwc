@@ -1,4 +1,4 @@
-package infix
+package bwc
 
 import (
 	"fmt"
@@ -66,46 +66,46 @@ func TestEvalGrammar(t *testing.T) {
 		},
 		{
 			code: "a = 0",
-			res: 0,
+			res:  0,
 		},
 		{
 			code: "b = a",
-			res: 0,
+			res:  0,
 		},
 		{
 			code: "a | 1",
-			res: 1,
+			res:  1,
 		},
 		{
 			code: "a = 0xff",
-			res: 0xff,
+			res:  0xff,
 		},
 		{
 			code: "a&1",
-			res: 1,
+			res:  1,
 		},
 		{
 			code: "(a&0)|1",
-			res: 1,
+			res:  1,
 		},
 		{
 			code: "a&(a&0)",
-			res: 0,
+			res:  0,
 		},
 		{
 			code: "1<<10|0xff",
-			res: 0x4ff,
+			res:  0x4ff,
 		},
 		{
 			code: "b = 0b01010101",
-			res: 0x55,
+			res:  0x55,
 		},
 		{
 			code: "a&b",
-			res: 85,
+			res:  85,
 		},
 	} {
-		
+
 		got, err := interp.Exec(tc.code)
 		if err != nil {
 			t.Fatal(err)

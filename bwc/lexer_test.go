@@ -1,17 +1,18 @@
-package infix_test
+package bwc_test
 
 import (
-	"github.com/madlambda/bwc/infix"
 	"testing"
+
+	"github.com/madlambda/bwc/bwc"
 )
 
 type testcase struct {
 	in  string
-	out []infix.Tokval
+	out []bwc.Tokval
 }
 
-func consume(tokens <-chan infix.Tokval) []infix.Tokval {
-	var toks []infix.Tokval
+func consume(tokens <-chan bwc.Tokval) []bwc.Tokval {
+	var toks []bwc.Tokval
 	for tok := range tokens {
 		toks = append(toks, tok)
 	}
@@ -20,7 +21,7 @@ func consume(tokens <-chan infix.Tokval) []infix.Tokval {
 
 func test(t *testing.T, tc testcase) {
 	t.Helper()
-	got := consume(infix.Lex(tc.in))
+	got := consume(bwc.Lex(tc.in))
 	if len(got) != len(tc.out) {
 		t.Logf("test data: %v", tc.in)
 		t.Logf("got: %v", got)
@@ -44,196 +45,196 @@ func TestLexer(t *testing.T) {
 	for _, tc := range []testcase{
 		{
 			in: "0",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "0",
 				},
 			},
 		},
 		{
 			in: "0123456789",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "0123456789",
 				},
 			},
 		},
 		{
 			in: "0&0",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "0",
 				},
 				{
-					Type:  infix.AND,
+					Type:  bwc.AND,
 					Value: "&",
 				},
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "0",
 				},
 			},
 		},
 		{
 			in: "0^0",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "0",
 				},
 				{
-					Type:  infix.XOR,
+					Type:  bwc.XOR,
 					Value: "^",
 				},
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "0",
 				},
 			},
 		},
 		{
 			in: "0&0|1",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "0",
 				},
 				{
-					Type:  infix.AND,
+					Type:  bwc.AND,
 					Value: "&",
 				},
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "0",
 				},
 				{
-					Type:  infix.OR,
+					Type:  bwc.OR,
 					Value: "|",
 				},
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "1",
 				},
 			},
 		},
 		{
 			in: "(0&0)",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.LParen,
+					Type:  bwc.LParen,
 					Value: "(",
 				},
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "0",
 				},
 				{
-					Type:  infix.AND,
+					Type:  bwc.AND,
 					Value: "&",
 				},
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "0",
 				},
 				{
-					Type:  infix.RParen,
+					Type:  bwc.RParen,
 					Value: ")",
 				},
 			},
 		},
 		{
 			in: "0xf",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "0xf",
 				},
 			},
 		},
 		{
 			in: "(1>>2)",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.LParen,
+					Type:  bwc.LParen,
 					Value: "(",
 				},
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "1",
 				},
 				{
-					Type:  infix.SHR,
+					Type:  bwc.SHR,
 					Value: ">>",
 				},
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "2",
 				},
 				{
-					Type:  infix.RParen,
+					Type:  bwc.RParen,
 					Value: ")",
 				},
 			},
 		},
 		{
 			in: "a = 0",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Ident,
+					Type:  bwc.Ident,
 					Value: "a",
 				},
 				{
-					Type:  infix.Equal,
+					Type:  bwc.Equal,
 					Value: "=",
 				},
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "0",
 				},
 			},
 		},
 		{
 			in: "aa = aa",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Ident,
+					Type:  bwc.Ident,
 					Value: "aa",
 				},
 				{
-					Type:  infix.Equal,
+					Type:  bwc.Equal,
 					Value: "=",
 				},
 				{
-					Type:  infix.Ident,
+					Type:  bwc.Ident,
 					Value: "aa",
 				},
 			},
 		},
 		{
 			in: "_a = 0b10000",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Ident,
+					Type:  bwc.Ident,
 					Value: "_a",
 				},
 				{
-					Type:  infix.Equal,
+					Type:  bwc.Equal,
 					Value: "=",
 				},
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "0b10000",
 				},
 			},
 		},
 		{
 			in: "1invalid = 0b10000",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Illegal,
+					Type:  bwc.Illegal,
 					Value: "malformed number",
 				},
 			},
@@ -248,63 +249,63 @@ func TestLexerNumbers(t *testing.T) {
 	for _, tc := range []testcase{
 		{
 			in: "01",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "01",
 				},
 			},
 		},
 		{
 			in: "97497239472938",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "97497239472938",
 				},
 			},
 		},
 		{
 			in: "0b",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Illegal,
+					Type:  bwc.Illegal,
 					Value: "malformed binary number",
 				},
 			},
 		},
 		{
 			in: "0bf",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Illegal,
+					Type:  bwc.Illegal,
 					Value: "malformed binary number",
 				},
 			},
 		},
 		{
 			in: "0b111112",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Illegal,
+					Type:  bwc.Illegal,
 					Value: "malformed number",
 				},
 			},
 		},
 		{
 			in: "0xffg",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Illegal,
+					Type:  bwc.Illegal,
 					Value: "malformed number",
 				},
 			},
 		},
 		{
 			in: "0b11111111",
-			out: []infix.Tokval{
+			out: []bwc.Tokval{
 				{
-					Type:  infix.Number,
+					Type:  bwc.Number,
 					Value: "0b11111111",
 				},
 			},

@@ -1,4 +1,4 @@
-package infix	
+package bwc
 
 import (
 	"fmt"
@@ -36,8 +36,7 @@ func (e *interp) Eval(n Node) (Int, error) {
 		return e.evalAssign(n.(Assign))
 	}
 
-
-	return 0, fmt.Errorf("unexpected %s", n) 
+	return 0, fmt.Errorf("unexpected %s", n)
 }
 
 func (e *interp) evalVar(v Var) (Int, error) {
@@ -68,13 +67,13 @@ func (e *interp) evalOperand(n Node) (Int, error) {
 
 	return n.(Int), nil
 }
- 
+
 func (e *interp) evalBinExpr(expr BinExpr) (Int, error) {
 	lhs, err := e.evalOperand(expr.Lhs)
 	if err != nil {
 		return 0, err
 	}
-	
+
 	rhs, err := e.evalOperand(expr.Rhs)
 	if err != nil {
 		return 0, err
@@ -91,7 +90,7 @@ func (e *interp) evalBinExpr(expr BinExpr) (Int, error) {
 	case OpSHR:
 		ret = lhs >> uint(rhs)
 	default:
-		return 0	, fmt.Errorf("invalid op (%v)", expr.Op)
+		return 0, fmt.Errorf("invalid op (%v)", expr.Op)
 	}
 	return ret, nil
 }
