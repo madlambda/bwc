@@ -1,4 +1,4 @@
-package infix
+package bwc
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ type parser struct {
 var TokEOF = Tokval{
 	Type:  EOF,
 	Value: "<eof>",
-	Pos: -1,
+	Pos:   -1,
 }
 
 func eoferr(expect string) error {
@@ -22,8 +22,8 @@ func eoferr(expect string) error {
 }
 
 func parserErr(expected string, tok Tokval) error {
-	return fmt.Errorf("expected %s but got %s at position %d", 
-			expected, tok, tok.Pos)
+	return fmt.Errorf("expected %s but got %s at position %d",
+		expected, tok, tok.Pos)
 }
 
 func Parse(code string) (Node, error) {

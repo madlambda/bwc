@@ -1,8 +1,9 @@
-package infix_test
+package bwc_test
 
 import (
-	"github.com/madlambda/bwc/infix"
 	"testing"
+
+	"github.com/madlambda/bwc/infix"
 )
 
 type testcase struct {
